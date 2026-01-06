@@ -146,7 +146,6 @@ EOSQL
     RESTORE_OUTPUT=$(mktemp)
     # Use || true to prevent set -e from exiting on pg_restore's exit code
     pg_restore -v --dbname "zava" --clean --if-exists --no-owner --no-privileges "$BACKUP_FILE" 2>"$RESTORE_OUTPUT" || true
-    RESTORE_EXIT_CODE=${PIPESTATUS[0]}
     
     # Re-check exit code from the temp file content since pg_restore returns 1 for warnings
     if grep -q "errors ignored on restore" "$RESTORE_OUTPUT"; then
