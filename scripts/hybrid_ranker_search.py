@@ -15,7 +15,6 @@ POSTGRES_USERNAME = os.environ["POSTGRES_SERVER_USERNAME"]
 POSTGRES_DATABASE = "zava"
 
 if POSTGRES_HOST.endswith(".database.azure.com"):
-    print("Authenticating to Azure Database for PostgreSQL using Azure Identity...")
     azure_credential = DefaultAzureCredential()
     token = azure_credential.get_token("https://ossrdbms-aad.database.windows.net/.default")
     POSTGRES_PASSWORD = token.token
@@ -37,12 +36,13 @@ conn = psycopg2.connect(
 conn.autocommit = True
 cur = conn.cursor()
 
-# Create pgvector extension
+# Create pgvector and pg_diskann extensions
 cur.execute("CREATE EXTENSION IF NOT EXISTS vector")
+cur.execute("CREATE EXTENSION IF NOT EXISTS pg_diskann CASCADE")
 register_vector(conn)
 
 # Enable iterative index scans to ensure we get the full LIMIT count
-cur.execute("SET hnsw.iterative_scan = strict_order")
+cur.execute("SET diskann.iterative_search = 'strict_order'")
 
 # Search query
 search_query = "garden watering supplies"

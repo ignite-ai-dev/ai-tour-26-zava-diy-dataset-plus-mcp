@@ -34,10 +34,13 @@ conn = psycopg2.connect(
 
 conn.autocommit = True
 cur = conn.cursor()
+
+# Configure pgvector and DiskANN
 cur.execute("CREATE EXTENSION IF NOT EXISTS vector")
+cur.execute("CREATE EXTENSION IF NOT EXISTS pg_diskann CASCADE")
 register_vector(conn)
-cur.execute("CREATE INDEX IF NOT EXISTS idx_product_embeddings_hnsw ON retail.product_description_embeddings USING hnsw (description_embedding vector_cosine_ops)")
-cur.execute("SET hnsw.iterative_scan = strict_order")
+cur.execute("CREATE INDEX IF NOT EXISTS idx_product_embeddings_diskann ON retail.product_description_embeddings USING diskann (description_embedding vector_cosine_ops)")
+cur.execute("SET diskann.iterative_search = 'strict_order'")
 
 search_query = "25 foot garden hose"
 

@@ -15,7 +15,8 @@ var sanitizedModelName = replace(modelName, '.', '')
 var subscriptionName = '${sanitizedModelName}-subscription'
 
 // Endpoint Resource name is invalid. Resource name can only contain alphanumeric characters, dashes, with a limit of 52 characters.
-var endpointName = '${sanitizedModelName}-endpoint'
+var endpointUniqueSuffix = uniqueString(resourceGroup().id, sanitizedModelName)
+var endpointName = toLower('${sanitizedModelName}-${endpointUniqueSuffix}')
 
 // Existing project (workspace)
 resource project 'Microsoft.MachineLearningServices/workspaces@2024-01-01-preview' existing = {

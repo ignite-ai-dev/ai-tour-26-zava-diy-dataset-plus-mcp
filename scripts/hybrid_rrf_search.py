@@ -35,8 +35,9 @@ conn = psycopg2.connect(
 conn.autocommit = True
 cur = conn.cursor()
 cur.execute("CREATE EXTENSION IF NOT EXISTS vector")
+cur.execute("CREATE EXTENSION IF NOT EXISTS pg_diskann CASCADE")
 register_vector(conn)
-cur.execute("SET hnsw.iterative_scan = strict_order")
+cur.execute("SET diskann.iterative_search = 'strict_order'")
 
 # Search query
 search_query = "garden watering supplies"
@@ -101,7 +102,7 @@ SELECT
 FROM vector_search
 FULL OUTER JOIN keyword_search ON vector_search.product_id = keyword_search.product_id
 ORDER BY rrf_score DESC
-LIMIT 10;
+LIMIT 5;
 """
 
 cur.execute(rrf_sql, {

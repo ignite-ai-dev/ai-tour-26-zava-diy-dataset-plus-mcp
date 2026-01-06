@@ -107,7 +107,7 @@ resource configurations 'Microsoft.DBforPostgreSQL/flexibleServers/configuration
   name: 'azure.extensions'
   parent: postgresServer
   properties: {
-    value: 'vector,azure_ai'
+    value: 'vector,azure_ai,pg_diskann'
     source: 'user-override'
   }
   dependsOn: [
