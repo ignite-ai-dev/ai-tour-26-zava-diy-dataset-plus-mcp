@@ -3,7 +3,6 @@ import os
 import dotenv
 import psycopg2
 from azure.identity import DefaultAzureCredential
-from pgvector.psycopg2 import register_vector
 
 dotenv.load_dotenv(override=True)
 
@@ -35,10 +34,9 @@ conn = psycopg2.connect(
 conn.autocommit = True
 cur = conn.cursor()
 
-# Configure pgvector and DiskANN
+# Configure pgvector and pg_diskann extensions
 cur.execute("CREATE EXTENSION IF NOT EXISTS vector")
 cur.execute("CREATE EXTENSION IF NOT EXISTS pg_diskann CASCADE")
-register_vector(conn)
 cur.execute("CREATE INDEX IF NOT EXISTS idx_product_embeddings_diskann ON retail.product_description_embeddings USING diskann (description_embedding vector_cosine_ops)")
 cur.execute("SET diskann.iterative_search = 'strict_order'")
 
