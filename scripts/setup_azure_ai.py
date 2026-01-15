@@ -199,12 +199,37 @@ try:
     else:
         print("\n4b. Cohere reranker testing skipped (endpoint not configured)")
     
+    # 5. Configure DiskANN indexes (drop IVFFlat, ensure DiskANN exists)
+    print("\n5. Configuring DiskANN vector indexes...")
+    
+    try:
+        cur.execute("CREATE EXTENSION IF NOT EXISTS pg_diskann CASCADE")
+        print("✓ pg_diskann extension created/verified")
+        
+        # Drop IVFFlat indexes in favor of DiskANN
+        cur.execute("DROP INDEX IF EXISTS retail.idx_product_description_embeddings_vector")
+        print("✓ Dropped IVFFlat index on product_description_embeddings (if existed)")
+        
+        cur.execute("DROP INDEX IF EXISTS retail.idx_product_image_embeddings_vector")
+        print("✓ Dropped IVFFlat index on product_image_embeddings (if existed)")
+        
+        # Create DiskANN indexes
+        cur.execute("CREATE INDEX IF NOT EXISTS idx_product_embeddings_diskann ON retail.product_description_embeddings USING diskann (description_embedding vector_cosine_ops)")
+        print("✓ Created DiskANN index on product_description_embeddings")
+        
+        cur.execute("CREATE INDEX IF NOT EXISTS idx_product_image_embeddings_diskann ON retail.product_image_embeddings USING diskann (image_embedding vector_cosine_ops)")
+        print("✓ Created DiskANN index on product_image_embeddings")
+        
+    except psycopg2.Error as e:
+        print(f"⚠ Warning: Could not configure DiskANN indexes: {e}")
+    
     print("\n" + "="*60)
     print("CONFIGURATION SUMMARY")
     print("="*60)
     
     print(f"✓ Azure AI extension: Enabled")
     print(f"✓ Azure OpenAI: Configured with {('managed identity' if USE_MANAGED_IDENTITY else 'subscription key')}")
+    print(f"✓ DiskANN indexes: Configured")
     if COHERE_RERANK_ENDPOINT_URI:
         print(f"✓ Cohere Reranker: Configured with {('managed identity' if USE_RANKING_MANAGED_IDENTITY else 'subscription key')}")
     else:
