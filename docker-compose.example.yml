@@ -1,0 +1,39 @@
+# Example docker-compose for an agents repo.
+#
+# The zava-diy-db image is self-contained — no local files needed.
+# On first start it restores the full Zava retail dataset automatically.
+#
+# Connection string:  postgresql://postgres:P%40ssw0rd%21@localhost:5432/zava
+# (password URL-encoded: P@ssw0rd! → P%40ssw0rd%21)
+
+name: my-agent
+
+networks:
+  agent-network:
+    driver: bridge
+
+services:
+  db:
+    image: ghcr.io/<your-github-username>/zava-diy-db:latest
+    container_name: zava-db
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: postgres
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: P@ssw0rd!
+    volumes:
+      - zava_data:/var/lib/postgresql/data
+    networks:
+      - agent-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d zava"]
+      interval: 10s
+      timeout: 5s
+      retries: 20
+      start_period: 90s
+
+volumes:
+  zava_data:
+    driver: local

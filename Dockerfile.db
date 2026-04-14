@@ -1,0 +1,33 @@
+# Zava DIY Database Image
+#
+# Builds a self-contained PostgreSQL 17 + pgvector image pre-loaded with
+# the Zava retail dataset. Publish it from GitHub to GitHub Container
+# Registry, then reference it from any docker-compose without needing the
+# backup file or init scripts locally.
+#
+# Local build:
+#   docker build -f Dockerfile.db -t zava-diy-db:latest .
+#
+# GitHub publish:
+#   Push this repository to GitHub and let the workflow in
+#   .github/workflows/publish-db-image.yml build and publish the image.
+
+FROM pgvector/pgvector:pg17
+
+# Default credentials — override at runtime via environment variables
+ENV POSTGRES_DB=postgres
+ENV POSTGRES_USER=postgres
+ENV POSTGRES_PASSWORD=P@ssw0rd!
+
+# Bundle the backup and the init script into the image.
+# The postgres entrypoint executes everything in /docker-entrypoint-initdb.d/
+# when the data directory is empty (i.e. first container start).
+COPY data/zava_retail_2025_07_21_postgres_rls.backup \
+     /docker-entrypoint-initdb.d/zava.backup
+
+COPY scripts/init-db-docker.sh \
+     /docker-entrypoint-initdb.d/01-init-zava.sh
+
+RUN chmod +x /docker-entrypoint-initdb.d/01-init-zava.sh
+
+EXPOSE 5432

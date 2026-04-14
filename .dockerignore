@@ -4,4 +4,9 @@
 .ruff_cache
 .vscode
 .env
-__pycache__`
+__pycache__
+
+# Exclude everything from the data/ folder except the postgres backup
+data/*
+data/**
+!data/zava_retail_2025_07_21_postgres_rls.backup

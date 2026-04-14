@@ -64,6 +64,18 @@ The dev container provides a complete development environment with:
 - Python 3.x with all required packages
 - Azure CLI for cloud deployments
 
+### Publishing the Database Docker Image with GitHub
+
+If you want GitHub to build and host the database image for you, this repository now includes a workflow that publishes the image to **GitHub Container Registry (GHCR)**.
+
+1. Create a new repository in your GitHub account and push this code to the default branch.
+2. Open the repository on GitHub and make sure **Actions** are enabled.
+3. On every push to `main` or `master`, GitHub will build `Dockerfile.db` and publish:
+   - `ghcr.io/<your-github-username>/zava-diy-db:latest`
+   - branch, tag, and commit-SHA tags
+4. If you want others to pull the image without authentication, set the package visibility to public from the repository's **Packages** section.
+5. Use the example in `docker-compose.example.yml` to run the published image anywhere.
+
 ### Deploying Azure Resources (Optional)
 
 If you want to use Azure AI services with this project, you can deploy the required Azure resources:
